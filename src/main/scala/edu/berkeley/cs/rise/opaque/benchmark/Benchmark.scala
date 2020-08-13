@@ -45,14 +45,56 @@ object Benchmark {
     // val numPartitions =
     //   if (spark.sparkContext.isLocal) 1 else spark.sparkContext.defaultParallelism
 
-    // Warmup
-    LogisticRegression.train(spark, Encrypted, 1000, 1)
-    LogisticRegression.train(spark, Encrypted, 1000, 1)
+    // // Warmup
+    // LogisticRegression.train(spark, Encrypted, 1000, 1)
+    // LogisticRegression.train(spark, Encrypted, 1000, 1)
 
-    // Run
-    LogisticRegression.train(spark, Insecure, 100000, 1)
-    LogisticRegression.train(spark, Encrypted, 100000, 1)
+    // // Run
+    // LogisticRegression.train(spark, Insecure, 100000, 1)
+    // LogisticRegression.train(spark, Encrypted, 100000, 1)
+    val nums = Seq(1,2,3,4,5,6,7,8,9,10)
+    for(n <- nums){
+      BigDataBenchmark.q1(spark, Insecure, "10k", 10)
+      BigDataBenchmark.q1(spark, Insecure, "100k", 10)
+      BigDataBenchmark.q1(spark, Insecure, "1million", 10)
+      BigDataBenchmark.q1(spark, Insecure, "10million", 10)
+    }
 
+    for(n <- nums){
+      BigDataBenchmark.q2(spark, Insecure, "10k", 10)
+      BigDataBenchmark.q2(spark, Insecure, "100k", 10)
+      BigDataBenchmark.q2(spark, Insecure, "1million", 10)
+      BigDataBenchmark.q2(spark, Insecure, "10million", 10)
+    }
+
+    for(n <- nums){
+      BigDataBenchmark.q3(spark, Insecure, "10k", 10)
+      BigDataBenchmark.q3(spark, Insecure, "100k", 10)
+      BigDataBenchmark.q3(spark, Insecure, "1million", 10)
+      BigDataBenchmark.q3(spark, Insecure, "10million", 10)
+    }
+    for(n <- nums){
+      BigDataBenchmark.q1(spark, Encrypted, "10k", 1)
+      BigDataBenchmark.q1(spark, Encrypted, "100k", 5)
+      BigDataBenchmark.q1(spark, Encrypted, "1million", 10)
+      BigDataBenchmark.q1(spark, Encrypted, "10million", 30)
+    }
+    for(n <- nums){
+      BigDataBenchmark.q2(spark, Encrypted, "10k", 1)
+      BigDataBenchmark.q2(spark, Encrypted, "100k", 5)
+      BigDataBenchmark.q2(spark, Encrypted, "1million", 20)
+      BigDataBenchmark.q2(spark, Encrypted, "10million", 30)
+    }
+    for(n <- nums){
+      BigDataBenchmark.q3(spark, Encrypted, "10k", 1)
+      BigDataBenchmark.q3(spark, Encrypted, "100k", 5)
+      BigDataBenchmark.q3(spark, Encrypted, "1million", 20)
+      BigDataBenchmark.q3(spark, Encrypted, "10million", 30)
+    }
+
+
+
+      
     spark.stop()
   }
 }
