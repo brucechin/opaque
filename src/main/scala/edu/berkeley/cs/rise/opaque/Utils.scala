@@ -163,7 +163,8 @@ object Utils extends Logging {
     val attrs = benchmarkAttrs.toMap + (
       "time" -> timeMs,
       "sgx" -> (if (System.getenv("SGX_MODE") == "HW") "hw" else "sim"))
-    logInfo(jsonSerialize(attrs))
+    //logInfo(jsonSerialize(attrs))
+    println(attrs)
     result
   }
 

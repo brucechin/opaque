@@ -20,7 +20,7 @@ set(SOURCES
   ${CMAKE_CURRENT_BINARY_DIR}/key.cpp)
 
 add_custom_command(
-  COMMAND ${SGX_EDGER8R} --trusted ${CMAKE_SOURCE_DIR}/Enclave/Enclave.edl --search-path ${CMAKE_SOURCE_DIR}/Enclave --search-path "$ENV{SGX_SDK}/include"
+  COMMAND ${SGX_EDGER8R} --trusted ${CMAKE_SOURCE_DIR}/Enclave/Enclave.edl --search-path ${CMAKE_SOURCE_DIR}/Enclave --search-path "${SGX_SDK}/include"
   DEPENDS ${CMAKE_SOURCE_DIR}/Enclave/Enclave.edl
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Enclave_t.c)
 
@@ -29,9 +29,9 @@ add_custom_command(
   DEPENDS ../ServiceProvider/keygen
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/key.cpp)
 
-include_directories(SYSTEM "$ENV{SGX_SDK}/include/libcxx")
-include_directories(SYSTEM "$ENV{SGX_SDK}/include/tlibc")
-
+include_directories(SYSTEM "${SGX_SDK}/include/libcxx")
+include_directories(SYSTEM "${SGX_SDK}/include/tlibc")
+include_directories(SYSTEM "/usr/include")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -nostdinc -fvisibility=hidden -fpie -fstack-protector")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS} -nostdinc++")
 set(ENCLAVE_LINK_FLAGS "-Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined -Wl,-pie,-eenclave_entry -Wl,--export-dynamic -Wl,--defsym,__ImageBase=0 -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/Enclave.lds")
@@ -65,7 +65,7 @@ target_link_libraries(enclave_trusted -Wl,--whole-archive "${Trts_Library_Path}"
 # TODO: Use the user-generated private key to sign the enclave code.
 # Currently we use the sample private key from the Intel SGX SDK.
 add_custom_command(
-  COMMAND ${SGX_ENCLAVE_SIGNER} sign -key "$ENV{SGX_SDK}/SampleCode/SampleEnclave/Enclave/Enclave_private.pem" -enclave $<TARGET_FILE:enclave_trusted> -out libenclave_trusted_signed.so -config ${CMAKE_CURRENT_SOURCE_DIR}/Enclave.config.xml
+  COMMAND ${SGX_ENCLAVE_SIGNER} sign -key "${SGX_SDK}/SampleCode/SampleEnclave/Enclave/Enclave_private.pem" -enclave $<TARGET_FILE:enclave_trusted> -out libenclave_trusted_signed.so -config ${CMAKE_CURRENT_SOURCE_DIR}/Enclave.config.xml
   DEPENDS enclave_trusted ${CMAKE_CURRENT_SOURCE_DIR}/Enclave.config.xml
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/libenclave_trusted_signed.so)
 add_custom_target(enclave_trusted_signed_target ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/libenclave_trusted_signed.so)
