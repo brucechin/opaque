@@ -22,8 +22,8 @@ fork in Test := true
 scalacOptions ++= Seq("-g:vars")
 javaOptions ++= Seq("-Xdebug", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000")
 // This and the next line fix a problem with forked run: https://github.com/scalatest/scalatest/issues/770
-javaOptions in Test ++= Seq("-Xmx2048m", "-XX:ReservedCodeCacheSize=384m", "-XX:MaxPermSize=384m")
-
+javaOptions in Test ++= Seq("-Xmx62048m", "-XX:ReservedCodeCacheSize=384m", "-XX:MaxPermSize=384m")
+javaOptions in run ++= Seq("-Xmx60048m", "-XX:ReservedCodeCacheSize=384m", "-Dspark.master=local[1]")
 // Enclave C++ build
 val enclaveBuildTask = TaskKey[Unit]("enclaveBuild", "Builds the C++ enclave code")
 
