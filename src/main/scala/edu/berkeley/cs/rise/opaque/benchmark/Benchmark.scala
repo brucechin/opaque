@@ -16,7 +16,7 @@
  */
 
 package edu.berkeley.cs.rise.opaque.benchmark
-
+import edu.berkeley.cs.rise.opaque.benchmark._
 import edu.berkeley.cs.rise.opaque.Utils
 import org.apache.spark.sql.SparkSession
 import edu.berkeley.cs.rise.opaque.Utils
@@ -47,8 +47,8 @@ object Benchmark {
   def main(args: Array[String]) {
     val spark = SparkSession.builder().appName("QEDBenchmark").getOrCreate()
     Utils.initSQLContext(spark.sqlContext)
-    LogManager.getLogger("org.apache.spark").setLevel(Level.WARN)
-    LogManager.getLogger("org.apache.spark.executor.Executor").setLevel(Level.WARN)
+    LogManager.getLogger("org.apache.spark").setLevel(Level.ERROR)
+    LogManager.getLogger("org.apache.spark.executor.Executor").setLevel(Level.ERROR)
     // val numPartitions =
     //   if (spark.sparkContext.isLocal) 1 else spark.sparkContext.defaultParallelism
 
