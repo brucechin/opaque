@@ -67,7 +67,7 @@ else
         App_C_Flags += -DNDEBUG -UEDEBUG -UDEBUG
 endif
 
-App_Cpp_Flags := $(App_C_Flags) -std=c++11 -Wall -Wextra -Werror
+App_Cpp_Flags := $(App_C_Flags) -std=c++11 -Wall -Wextra 
 App_Link_Flags := $(SGX_COMMON_CFLAGS) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -lsgx_ukey_exchange -lpthread
 
 ifneq ($(SGX_MODE), HW)
@@ -101,7 +101,7 @@ Enclave_Include_Paths := \
 	-I$(SGX_SDK)/include/tlibc \
 
 Enclave_C_Flags := $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fpie -fstack-protector $(Enclave_Include_Paths)
-Enclave_Cpp_Flags := $(Enclave_C_Flags) -std=c++11 -nostdinc++ -Wall -Wextra -Werror
+Enclave_Cpp_Flags := $(Enclave_C_Flags) -std=c++11 -nostdinc++ -Wall -Wextra 
 Enclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined \
 	-nostdlib -nodefaultlibs -nostartfiles \
 	-L$(SGX_LIBRARY_PATH) \
@@ -140,7 +140,7 @@ ServiceProvider_Cpp_Files := ServiceProvider/Main.cpp ServiceProvider/ecp.cpp Se
 ServiceProvider_Include_Paths := -I$(SGX_SDK)/include -ICommon -IInclude -IServiceProvider
 
 ServiceProvider_C_Flags := $(SGX_COMMON_CFLAGS) -fPIC -Wno-attributes $(ServiceProvider_Include_Paths)
-ServiceProvider_Cpp_Flags := $(ServiceProvider_C_Flags) -std=c++11 -Wall -Wextra -Werror
+ServiceProvider_Cpp_Flags := $(ServiceProvider_C_Flags) -std=c++11 -Wall -Wextra 
 ServiceProvider_Link_Flags :=  $(SGX_COMMON_CFLAGS) -L$(SGX_LIBRARY_PATH) \
 	-lcrypto -lssl
 
