@@ -48,8 +48,7 @@ initialCommands in console :=
     |LogManager.getLogger("org.apache.spark").setLevel(Level.WARN)
     |LogManager.getLogger("org.apache.spark.executor.Executor").setLevel(Level.WARN)
     |
-    |val spark = SparkSession.builder().config("spark.executor.memory", "8g")
-    |        .config("spark.driver.memory", "60g").appName("QEDBenchmark").getOrCreate()
+    |    val spark = SparkSession.builder().appName("QEDBenchmark").getOrCreate()
     |    Utils.initSQLContext(spark.sqlContext)
     |    LogManager.getLogger("org.apache.spark").setLevel(Level.ERROR)
     |    LogManager.getLogger("org.apache.spark.executor.Executor").setLevel(Level.ERROR)
