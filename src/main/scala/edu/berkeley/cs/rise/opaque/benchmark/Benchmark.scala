@@ -19,8 +19,6 @@ package edu.berkeley.cs.rise.opaque.benchmark
 import edu.berkeley.cs.rise.opaque.benchmark._
 import edu.berkeley.cs.rise.opaque.Utils
 import org.apache.spark.sql.SparkSession
-import edu.berkeley.cs.rise.opaque.Utils
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.catalyst.analysis._
@@ -45,49 +43,59 @@ object Benchmark {
   }
 
   def main(args: Array[String]) {
-    val spark = SparkSession.builder().appName("QEDBenchmark").getOrCreate()
+    val spark = (org.apache.spark.sql.SparkSession.builder().master("local").appName("Opaque shell").getOrCreate())    
     Utils.initSQLContext(spark.sqlContext)
     LogManager.getLogger("org.apache.spark").setLevel(Level.ERROR)
     LogManager.getLogger("org.apache.spark.executor.Executor").setLevel(Level.ERROR)
     // val numPartitions =
     //   if (spark.sparkContext.isLocal) 1 else spark.sparkContext.defaultParallelism
 
-    val numPartitions = 5
-
-    // Warmup
-    BigDataBenchmark.q2(spark, Encrypted, "tiny", numPartitions)
-    BigDataBenchmark.q2(spark, Encrypted, "tiny", numPartitions)
-
     // Run
-    BigDataBenchmark.q1(spark, Insecure, "1million", numPartitions)
-    BigDataBenchmark.q1(spark, Encrypted, "1million", numPartitions)
-    BigDataBenchmark.q1(spark, Oblivious, "1million", numPartitions)
+    val nums = Seq(3)
+    // for(n <- nums){
+    //   BigDataBenchmark.q1(spark, Insecure, "10000", 1)
+    //   BigDataBenchmark.q1(spark, Insecure, "100000", 1)
+    //   BigDataBenchmark.q1(spark, Insecure, "1000000", 3)
+    //   //BigDataBenchmark.q1(spark, Insecure, "10000000", 10)
+    // }
 
-    BigDataBenchmark.q2(spark, Insecure, "1million", numPartitions)
-    BigDataBenchmark.q2(spark, Encrypted, "1million", numPartitions)
-    BigDataBenchmark.q2(spark, Oblivious, "1million", numPartitions)
+    // for(n <- nums){
+    //   BigDataBenchmark.q2(spark, Insecure, "10000", 1)
+    //   BigDataBenchmark.q2(spark, Insecure, "100000", 1)
+    //   BigDataBenchmark.q2(spark, Insecure, "1000000", 3)
+    //   //BigDataBenchmark.q2(spark, Insecure, "10000000", 10)
+    // }
+    // for(n <- nums){
+    //   BigDataBenchmark.q3(spark, Insecure, "10000", 1)
+    //   BigDataBenchmark.q3(spark, Insecure, "100000", 1)
+    //   BigDataBenchmark.q3(spark, Insecure, "1000000", 3)
+    //   //BigDataBenchmark.q3(spark, Insecure, "10000000", 10)
+    // }
 
-    BigDataBenchmark.q3(spark, Insecure, "1million", numPartitions)
-    BigDataBenchmark.q3(spark, Encrypted, "1million", numPartitions)
-    BigDataBenchmark.q3(spark, Oblivious, "1million", numPartitions)
+    for(n <- nums){
+      BigDataBenchmark.q1(spark, Oblivious, "10000", 1)
+      BigDataBenchmark.q1(spark, Oblivious, "100000", 1)
+      BigDataBenchmark.q1(spark, Oblivious, "1000000", 3)
+      //BigDataBenchmark.q1(spark, Oblivious, "10000000", 30)
+    }
+
+    for(n <- nums){
+      BigDataBenchmark.q2(spark, Oblivious, "10000", 1)
+      BigDataBenchmark.q2(spark, Oblivious, "100000", 1)
+      BigDataBenchmark.q2(spark, Oblivious, "1000000", 3)
+      //BigDataBenchmark.q2(spark, Oblivious, "10000000", 30)
+    }
+    for(n <- nums){
+      BigDataBenchmark.q3(spark, Oblivious, "10000", 1)
+      BigDataBenchmark.q3(spark, Oblivious, "100000", 1)
+      BigDataBenchmark.q3(spark, Oblivious, "1000000", 3)
+      //BigDataBenchmark.q3(spark, Oblivious, "10000000", 30)
+    }
 
 
     Thread.sleep(10000000)
 
-    // if (spark.sparkContext.isLocal) {
-    //   for (i <- 8 to 20) {
-    //     PageRank.run(spark, Oblivious, math.pow(2, i).toInt.toString, numPartitions)
-    //   }
 
-    //   for (i <- 0 to 13) {
-    //     JoinReordering.treatmentQuery(spark, (math.pow(2, i) * 125).toInt.toString, numPartitions)
-    //     JoinReordering.geneQuery(spark, (math.pow(2, i) * 125).toInt.toString, numPartitions)
-    //   }
-
-    //   for (i <- 0 to 13) {
-    //     JoinCost.run(spark, Oblivious, (math.pow(2, i) * 125).toInt.toString, numPartitions)
-    //   }
-    // }
 
     spark.stop()
   }
