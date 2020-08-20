@@ -32,9 +32,12 @@ initialCommands in console :=
   """
     |import org.apache.spark.SparkContext
     |import org.apache.spark.sql.SQLContext
+    |import edu.berkeley.cs.rise.opaque.Utils
+    |import edu.berkeley.cs.rise.opaque.benchmark._
     |import org.apache.spark.sql.catalyst.analysis._
     |import org.apache.spark.sql.catalyst.dsl._
     |import org.apache.spark.sql.catalyst.errors._
+    |import org.apache.spark.sql.SparkSession
     |import org.apache.spark.sql.catalyst.expressions._
     |import org.apache.spark.sql.catalyst.plans.logical._
     |import org.apache.spark.sql.catalyst.rules._
@@ -48,7 +51,8 @@ initialCommands in console :=
     |LogManager.getLogger("org.apache.spark").setLevel(Level.WARN)
     |LogManager.getLogger("org.apache.spark.executor.Executor").setLevel(Level.WARN)
     |
-    |    val spark = SparkSession.builder().appName("QEDBenchmark").getOrCreate()
+    |        val spark = (org.apache.spark.sql.SparkSession.builder().master("local").appName("Opaque shell").getOrCreate())    
+    |
     |    Utils.initSQLContext(spark.sqlContext)
     |    LogManager.getLogger("org.apache.spark").setLevel(Level.ERROR)
     |    LogManager.getLogger("org.apache.spark.executor.Executor").setLevel(Level.ERROR)
