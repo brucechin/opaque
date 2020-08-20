@@ -19,6 +19,22 @@ package edu.berkeley.cs.rise.opaque.benchmark
 
 import edu.berkeley.cs.rise.opaque.Utils
 import org.apache.spark.sql.SparkSession
+import edu.berkeley.cs.rise.opaque.Utils
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.SparkContext
+import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.catalyst.analysis._
+import org.apache.spark.sql.catalyst.dsl._
+import org.apache.spark.sql.catalyst.errors._
+import org.apache.spark.sql.catalyst.expressions._
+import org.apache.spark.sql.catalyst.plans.logical._
+import org.apache.spark.sql.catalyst.rules._
+import org.apache.spark.sql.catalyst.util._
+import org.apache.spark.sql.execution
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types._
+import org.apache.log4j.Level
+import org.apache.log4j.LogManager
 
 object Benchmark {
   def dataDir: String = {
@@ -29,11 +45,10 @@ object Benchmark {
   }
 
   def main(args: Array[String]) {
-    val spark = SparkSession.builder()
-      .appName("QEDBenchmark")
-      .getOrCreate()
+    val spark = SparkSession.builder().appName("QEDBenchmark").getOrCreate()
     Utils.initSQLContext(spark.sqlContext)
-
+    LogManager.getLogger("org.apache.spark").setLevel(Level.WARN)
+    LogManager.getLogger("org.apache.spark.executor.Executor").setLevel(Level.WARN)
     // val numPartitions =
     //   if (spark.sparkContext.isLocal) 1 else spark.sparkContext.defaultParallelism
 
@@ -56,9 +71,6 @@ object Benchmark {
     BigDataBenchmark.q3(spark, Encrypted, "1million", numPartitions)
     BigDataBenchmark.q3(spark, Oblivious, "1million", numPartitions)
 
-    LeastSquaresBenchmark.query(spark, Insecure, "1000000", numPartitions)
-    LeastSquaresBenchmark.query(spark, Encrypted, "1000000", numPartitions)
-    LeastSquaresBenchmark.query(spark, Oblivious, "1000000", numPartitions)
 
     Thread.sleep(10000000)
 

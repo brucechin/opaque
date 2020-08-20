@@ -26,6 +26,42 @@ javaOptions in Test ++= Seq("-Xmx62048m", "-XX:ReservedCodeCacheSize=384m", "-XX
 javaOptions in run ++= Seq("-Xmx60048m", "-XX:ReservedCodeCacheSize=384m", "-Dspark.master=local[1]")
 // Enclave C++ build
 val enclaveBuildTask = TaskKey[Unit]("enclaveBuild", "Builds the C++ enclave code")
+scalacOptions in (Compile, console) := Seq.empty
+
+initialCommands in console :=
+  """
+    |import org.apache.spark.SparkContext
+    |import org.apache.spark.sql.SQLContext
+    |import org.apache.spark.sql.catalyst.analysis._
+    |import org.apache.spark.sql.catalyst.dsl._
+    |import org.apache.spark.sql.catalyst.errors._
+    |import org.apache.spark.sql.catalyst.expressions._
+    |import org.apache.spark.sql.catalyst.plans.logical._
+    |import org.apache.spark.sql.catalyst.rules._
+    |import org.apache.spark.sql.catalyst.util._
+    |import org.apache.spark.sql.execution
+    |import org.apache.spark.sql.functions._
+    |import org.apache.spark.sql.types._
+    |import org.apache.log4j.Level
+    |import org.apache.log4j.LogManager
+    |
+    |LogManager.getLogger("org.apache.spark").setLevel(Level.WARN)
+    |LogManager.getLogger("org.apache.spark.executor.Executor").setLevel(Level.WARN)
+    |
+    |val spark = (org.apache.spark.sql.SparkSession.builder()
+    |  .master("local")
+    |  .appName("Opaque shell")
+    |  .getOrCreate())
+    |val sc = spark.sparkContext
+    |val sqlContext = spark.sqlContext
+    |
+    |import spark.implicits._
+    |
+    |import edu.berkeley.cs.rise.opaque.implicits._
+    |edu.berkeley.cs.rise.opaque.Utils.initSQLContext(sqlContext)
+  """.stripMargin
+
+cleanupCommands in console := "spark.stop()"
 
 enclaveBuildTask := {
   import sys.process._
