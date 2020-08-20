@@ -18,6 +18,7 @@ parallelExecution := false
 
 // This fixes a class loader problem with scala.Tuple2 class, scala-2.11, Spark 2.x
 fork in Test := true
+fork in run := true
 
 scalacOptions ++= Seq("-g:vars")
 javaOptions ++= Seq("-Xdebug", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000")
@@ -25,8 +26,40 @@ javaOptions ++= Seq("-Xdebug", "-agentlib:jdwp=transport=dt_socket,server=y,susp
 javaOptions in Test ++= Seq("-Xmx62048m", "-XX:ReservedCodeCacheSize=384m", "-XX:MaxPermSize=384m")
 javaOptions in run ++= Seq("-Xmx60048m", "-XX:ReservedCodeCacheSize=384m", "-Dspark.master=local[1]")
 // Enclave C++ build
-val enclaveBuildTask = TaskKey[Unit]("enclaveBuild", "Builds the C++ enclave code")
+
+// Include Spark dependency for `build/sbt run`, though it is marked as "provided" for use with
+// spark-submit. From
+// https://github.com/sbt/sbt-assembly/blob/4a211b329bf31d9d5f0fae67ea4252896d8a4a4d/README.md
+run in Compile := Defaults.runTask(
+  fullClasspath in Compile,
+  mainClass in (Compile, run),
+  runner in (Compile, run)).evaluated
+
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-encoding", "UTF-8",
+  "-feature",
+  "-unchecked",
+  "-Xfuture",
+  "-Xlint:_",
+  "-Ywarn-adapted-args",
+  "-Ywarn-dead-code",
+  "-Ywarn-inaccessible",
+  "-Ywarn-infer-any",
+  "-Ywarn-nullary-override",
+  "-Ywarn-nullary-unit",
+  "-Ywarn-unused-import"
+)
 scalacOptions in (Compile, console) := Seq.empty
+
+
+val enclaveBuildTask = TaskKey[Unit]("enclaveBuild", "Builds the C++ enclave code")
+
+
+
+
+
+
 
 initialCommands in console :=
   """
