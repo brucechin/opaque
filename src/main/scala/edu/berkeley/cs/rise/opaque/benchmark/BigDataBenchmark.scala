@@ -104,7 +104,7 @@ object BigDataBenchmark {
       val df = rankingsDF
         .join(
           uservisitsDF
-            .filter($"visitDate" >= lit("1980-01-01") && $"visitDate" <= lit("1980-04-01"))
+            .filter($"visitDate" >= lit("1980-01-01") && $"visitDate" <= lit("1985-01-01"))
             .select($"destURL", $"sourceIP", $"adRevenue"),
           rankingsDF("pageURL") === uservisitsDF("destURL"))
         .select($"sourceIP", $"pageRank", $"adRevenue")

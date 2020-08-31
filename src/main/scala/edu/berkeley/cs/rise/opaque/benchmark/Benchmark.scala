@@ -51,32 +51,52 @@ object Benchmark {
     //   if (spark.sparkContext.isLocal) 1 else spark.sparkContext.defaultParallelism
 
     // Run
-    val nums = Seq(3)
-    // for(n <- nums){
-    //   BigDataBenchmark.q1(spark, Insecure, "10000", 1)
-    //   BigDataBenchmark.q1(spark, Insecure, "100000", 1)
-    //   BigDataBenchmark.q1(spark, Insecure, "1000000", 3)
-    //   //BigDataBenchmark.q1(spark, Insecure, "10000000", 10)
-    // }
+    val nums = Seq(1,2,3)
+    for(n <- nums){
+      BigDataBenchmark.q1(spark, Insecure, "10000", 1)
+      BigDataBenchmark.q1(spark, Insecure, "100000", 1)
+      BigDataBenchmark.q1(spark, Insecure, "1000000", 3)
+      BigDataBenchmark.q1(spark, Insecure, "10000000", 10)
+    }
 
-    // for(n <- nums){
-    //   BigDataBenchmark.q2(spark, Insecure, "10000", 1)
-    //   BigDataBenchmark.q2(spark, Insecure, "100000", 1)
-    //   BigDataBenchmark.q2(spark, Insecure, "1000000", 3)
-    //   //BigDataBenchmark.q2(spark, Insecure, "10000000", 10)
-    // }
-    // for(n <- nums){
-    //   BigDataBenchmark.q3(spark, Insecure, "10000", 1)
-    //   BigDataBenchmark.q3(spark, Insecure, "100000", 1)
-    //   BigDataBenchmark.q3(spark, Insecure, "1000000", 3)
-    //   //BigDataBenchmark.q3(spark, Insecure, "10000000", 10)
-    // }
+    for(n <- nums){
+      BigDataBenchmark.q2(spark, Insecure, "10000", 1)
+      BigDataBenchmark.q2(spark, Insecure, "100000", 1)
+      BigDataBenchmark.q2(spark, Insecure, "1000000", 3)
+      BigDataBenchmark.q2(spark, Insecure, "10000000", 10)
+    }
+    for(n <- nums){
+      BigDataBenchmark.q3(spark, Insecure, "10000", 1)
+      BigDataBenchmark.q3(spark, Insecure, "100000", 1)
+      BigDataBenchmark.q3(spark, Insecure, "1000000", 3)
+      BigDataBenchmark.q3(spark, Insecure, "10000000", 10)
+    }
+
+      for(n <- nums){
+      BigDataBenchmark.q1(spark, Encrypted, "10000", 1)
+      BigDataBenchmark.q1(spark, Encrypted, "100000", 1)
+      BigDataBenchmark.q1(spark, Encrypted, "1000000", 3)
+      BigDataBenchmark.q1(spark, Encrypted, "10000000", 20)
+    }
+
+    for(n <- nums){
+      BigDataBenchmark.q2(spark, Encrypted, "10000", 1)
+      BigDataBenchmark.q2(spark, Encrypted, "100000", 1)
+      BigDataBenchmark.q2(spark, Encrypted, "1000000", 3)
+      BigDataBenchmark.q2(spark, Encrypted, "10000000", 20)
+    }
+    for(n <- nums){
+      BigDataBenchmark.q3(spark, Encrypted, "10000", 1)
+      BigDataBenchmark.q3(spark, Encrypted, "100000", 1)
+      BigDataBenchmark.q3(spark, Encrypted, "1000000", 3)
+      BigDataBenchmark.q3(spark, Encrypted, "10000000", 20)
+    }
 
     for(n <- nums){
       BigDataBenchmark.q1(spark, Oblivious, "10000", 1)
       BigDataBenchmark.q1(spark, Oblivious, "100000", 1)
       BigDataBenchmark.q1(spark, Oblivious, "1000000", 3)
-      //BigDataBenchmark.q1(spark, Oblivious, "10000000", 30)
+      BigDataBenchmark.q1(spark, Oblivious, "10000000", 30)
     }
 
     for(n <- nums){
@@ -91,9 +111,6 @@ object Benchmark {
       BigDataBenchmark.q3(spark, Oblivious, "1000000", 3)
       //BigDataBenchmark.q3(spark, Oblivious, "10000000", 30)
     }
-
-
-    Thread.sleep(10000000)
 
 
 
