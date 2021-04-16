@@ -314,7 +314,7 @@ case class ObliviousFilterExec(instruction: Either[Expression, Opcode], child: S
               LessThanOrEqual(Cast(Col(3, _), StringType), Literal(end, StringType))),
             IsNotNull(Col(2, _)))
               if start == UTF8String.fromString("1980-01-01")
-              && end == UTF8String.fromString("1985-01-01") =>
+              && end == UTF8String.fromString("1983-01-01") =>
             OP_FILTER_COL3_DATE_BETWEEN_1980_01_01_AND_1980_04_01
           case Contains(Col(2, _), Literal(maroon, StringType))
               if maroon == UTF8String.fromString("maroon") =>

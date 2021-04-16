@@ -144,7 +144,7 @@ int read_secret_key(const char *filename,
   if (pkey == NULL) {
     printf("[read_secret_key] returned private key is null\n");
   } else {
-    assert(EVP_PKEY_type(pkey->type) == EVP_PKEY_EC);
+    //assert(EVP_PKEY_type(pkey->type) == EVP_PKEY_EC);
   }
 
   BIO *o = BIO_new_fp(stdout, BIO_NOCLOSE);

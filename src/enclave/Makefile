@@ -1,7 +1,7 @@
 ######## SGX SDK Settings ########
 
-SGX_SDK ?= /opt/intel/sgxsdk
-SGX_MODE ?= SIM
+SGX_SDK ?= /home/lianke/test/opaque/sgxsdk
+SGX_MODE ?= HW
 SGX_ARCH ?= x64
 
 ifeq ($(shell getconf LONG_BIT), 32)
@@ -99,9 +99,11 @@ Enclave_Include_Paths := \
 	-I$(SGX_SDK)/include/stlport \
 	-I$(SGX_SDK)/include \
 	-I$(SGX_SDK)/include/tlibc \
+	-I$(SGX_SDK)/include/stdc++ \
+	-I$(SGX_SDK)/include/libcxx \
 
 Enclave_C_Flags := $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fpie -fstack-protector $(Enclave_Include_Paths)
-Enclave_Cpp_Flags := $(Enclave_C_Flags) -std=c++11 -nostdinc++ -Wall -Wextra 
+Enclave_Cpp_Flags := $(Enclave_C_Flags) -std=c++11 -nostdinc++ -Wextra 
 Enclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined \
 	-nostdlib -nodefaultlibs -nostartfiles \
 	-L$(SGX_LIBRARY_PATH) \
@@ -124,7 +126,7 @@ App_SO_Name := libSGXEnclave.so
 Enclave_Name := enclave.so
 Signed_Enclave_Name := enclave.signed.so
 Enclave_Config_File := Enclave/Enclave.config.xml
-SP_SO_Name := libservice_provider.so
+# SP_SO_Name := libservice_provider.so
 
 ifeq ($(SGX_MODE), HW)
 ifneq ($(SGX_DEBUG), 1)
@@ -146,12 +148,12 @@ ServiceProvider_Link_Flags :=  $(SGX_COMMON_CFLAGS) -L$(SGX_LIBRARY_PATH) \
 
 ServiceProvider_Cpp_Objects := $(ServiceProvider_Cpp_Files:.cpp=.o)
 
-ServiceProvider_Name := main
+# ServiceProvider_Name := main
 
 .PHONY: all run
 
 ifeq ($(Build_Mode), HW_RELEASE)
-all: $(SP_SO_Name) $(App_Name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_SO_Name)
+all:  $(App_Name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_SO_Name) #$(SP_SO_Name)
 	@echo "The project has been built in release hardware mode."
 	@echo "Please sign the $(Enclave_Name) first with your signing key before you run the $(App_Name) to launch and access the enclave."
 	@echo "To sign the enclave use the command:"
@@ -159,10 +161,10 @@ all: $(SP_SO_Name) $(App_Name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_SO_N
 	@echo "You can also sign the enclave using an external signing tool. See User's Guide for more details."
 	@echo "To build the project in simulation mode set SGX_MODE=SIM. To build the project in prerelease mode set SGX_PRERELEASE=1 and SGX_MODE=HW."
 else
-all: $(SP_SO_Name)  $(App_Name) $(Signed_Enclave_Name) $(App_SO_Name)
+all:   $(App_Name) $(Signed_Enclave_Name) $(App_SO_Name) #$(SP_SO_Name)
 endif
 
-SPexec: $(ServiceProvider_Name)
+# SPexec: $(ServiceProvider_Name)
 
 run: all
 ifneq ($(Build_Mode), HW_RELEASE)
@@ -206,34 +208,34 @@ Enclave/%.o: Enclave/%.cpp
 	@echo "CXX  <=  $<"
 	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
 
-Enclave/key.cpp: $(ServiceProvider_Name)
-	@echo "SP   =>  $@"
-	./$(ServiceProvider_Name) $@
+# Enclave/key.cpp: $(ServiceProvider_Name)
+# 	@echo "SP   =>  $@"
+# 	./$(ServiceProvider_Name) $@
 
 $(Enclave_Name): Enclave/Enclave_t.o Enclave/sgxaes_asm.o $(Enclave_Cpp_Objects)
 	@echo "LINK =>  $@"
 	@$(CXX) $^ -o $@  $(Enclave_Link_Flags)
 
-Enclave/Enclave_private.pem:
-	@cp $(SGX_SDK)/SampleCode/SampleEnclave/Enclave/Enclave_private.pem Enclave/Enclave_private.pem
+Enclave/Enclave_private_test.pem:
+	@cp $(SGX_SDK)/SampleCode/SampleEnclave/Enclave/Enclave_private_test.pem Enclave/Enclave_private_test.pem
 
-$(Signed_Enclave_Name): Enclave/Enclave_private.pem $(Enclave_Name)
+$(Signed_Enclave_Name): Enclave/Enclave_private_test.pem $(Enclave_Name)
 	@echo "SIGN =>  $@"
 	@$(SGX_ENCLAVE_SIGNER) sign -key $< -enclave $(Enclave_Name) -out $@ -config $(Enclave_Config_File)
 
 ######## Service Provider/Master Objects ########
 
-ServiceProvider/%.o: ServiceProvider/%.cpp
-	@echo "CXX  <=  $<"
-	@$(CXX) $(ServiceProvider_Cpp_Flags) -c $< -o $@
+# ServiceProvider/%.o: ServiceProvider/%.cpp
+# 	@echo "CXX  <=  $<"
+# 	@$(CXX) $(ServiceProvider_Cpp_Flags) -c $< -o $@
 
-$(ServiceProvider_Name): $(ServiceProvider_Cpp_Objects)
-	@echo "LINK =>  $@"
-	@$(CXX) $^ -o $@ $(ServiceProvider_Link_Flags)
+# $(ServiceProvider_Name): $(ServiceProvider_Cpp_Objects)
+# 	@echo "LINK =>  $@"
+# 	@$(CXX) $^ -o $@ $(ServiceProvider_Link_Flags)
 
-$(SP_SO_Name): $(ServiceProvider_Cpp_Objects)
-	@echo "LINK =>  $@"
-	@$(CXX) $^ $(ServiceProvider_Link_Flags) -shared -o $@
+# $(SP_SO_Name): $(ServiceProvider_Cpp_Objects)
+# 	@echo "LINK =>  $@"
+# 	@$(CXX) $^ $(ServiceProvider_Link_Flags) -shared -o $@
 
 .PHONY: clean
 
@@ -243,4 +245,3 @@ clean:
 		$(Enclave_Name) $(Signed_Enclave_Name) \
 		$(App_Cpp_Objects) App/Enclave_u.* \
 		$(Enclave_Cpp_Objects) Enclave/Enclave_t.* \
-		$(ServiceProvider_Cpp_Objects) $(SP_SO_Name) $(ServiceProvider_Name)

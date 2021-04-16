@@ -110,9 +110,9 @@ enclaveBuildTask := {
   IO.copyFile(
     baseDirectory.value / "src" / "enclave" / "enclave.signed.so",
     baseDirectory.value / "enclave.signed.so")
-  IO.copyFile(
-    baseDirectory.value / "src" / "enclave" / "libservice_provider.so",
-    baseDirectory.value / "libservice_provider.so")
+  // IO.copyFile(
+  //   baseDirectory.value / "src" / "enclave" / "libservice_provider.so",
+  //   baseDirectory.value / "libservice_provider.so")
 }
 
 baseDirectory in enclaveBuildTask := (baseDirectory in ThisBuild).value

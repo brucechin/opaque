@@ -190,10 +190,6 @@ sgx_status_t enclave_init_ra(int b_pse,
     sgx_status_t ret = SGX_SUCCESS;
     if (b_pse) {
       int busy_retry_times = 2;
-      do {
-        ret = sgx_create_pse_session();
-      } while (ret == SGX_ERROR_BUSY && busy_retry_times--);
-
       if (ret != SGX_SUCCESS) {
         printf("SGX create pse_session failure\n");
         return ret;
@@ -243,10 +239,7 @@ sgx_status_t enclave_init_ra(int b_pse,
 #else
     ret = sgx_ra_init(&g_sp_pub_key, b_pse, p_context);
 #endif
-    if (b_pse) {
-      sgx_close_pse_session();
-      return ret;
-    }
+
     return ret;
 }
 

@@ -5,4 +5,4 @@ set -eu
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 make clean
-make
+make SGX_MODE=HW SGX_PRERELEASE=1

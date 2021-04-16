@@ -52,7 +52,7 @@
 
 #include "SGXEnclave.h"
 #include "sample_messages.h"    // this is for debugging remote attestation only
-#include "service_provider.h"
+//#include "service_provider.h"
 
 static sgx_ra_context_t context = INT_MAX;
 
@@ -237,31 +237,6 @@ int initialize_enclave(void)
   sgx_status_t ret = SGX_ERROR_UNEXPECTED;
   int updated = 0;
 
-  /* Step 1: retrive the launch token saved by last transaction */
-#ifdef _MSC_VER
-  /* try to get the token saved in CSIDL_LOCAL_APPDATA */
-  if (S_OK != SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, token_path)) {
-    strncpy_s(token_path, _countof(token_path), TOKEN_FILENAME, sizeof(TOKEN_FILENAME));
-  } else {
-    strncat_s(token_path, _countof(token_path), "\\" TOKEN_FILENAME, sizeof(TOKEN_FILENAME)+2);
-  }
-
-  /* open the token file */
-  HANDLE token_handler = CreateFileA(token_path, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, NULL, NULL);
-  if (token_handler == INVALID_HANDLE_VALUE) {
-    printf("Warning: Failed to create/open the launch token file \"%s\".\n", token_path);
-  } else {
-    /* read the token from saved file */
-    DWORD read_num = 0;
-    ReadFile(token_handler, token, sizeof(sgx_launch_token_t), &read_num, NULL);
-    if (read_num != 0 && read_num != sizeof(sgx_launch_token_t)) {
-      /* if token is invalid, clear the buffer */
-      memset(&token, 0x0, sizeof(sgx_launch_token_t));
-      printf("Warning: Invalid launch token read from \"%s\".\n", token_path);
-    }
-  }
-#else /* __GNUC__ */
-  /* try to get the token saved in $HOME */
   const char *home_dir = getpwuid(getuid())->pw_dir;
 
   if (home_dir != NULL &&
@@ -289,48 +264,21 @@ int initialize_enclave(void)
       printf("Warning: Invalid launch token read from \"%s\".\n", token_path);
     }
   }
-#endif
   /* Step 2: call sgx_create_enclave to initialize an enclave instance */
   /* Debug Support: set 2nd parameter to 1 */
   ret = sgx_create_enclave(ENCLAVE_FILENAME, SGX_DEBUG_FLAG, &token, &updated, &global_eid, NULL);
   if (ret != SGX_SUCCESS) {
     print_error_message(ret);
-#ifdef _MSC_VER
-    if (token_handler != INVALID_HANDLE_VALUE)
-      CloseHandle(token_handler);
-#else
     if (fp != NULL) fclose(fp);
-#endif
     return -1;
   }
 
   /* Step 3: save the launch token if it is updated */
-#ifdef _MSC_VER
-  if (updated == FALSE || token_handler == INVALID_HANDLE_VALUE) {
-    /* if the token is not updated, or file handler is invalid, do not perform saving */
-    if (token_handler != INVALID_HANDLE_VALUE)
-      CloseHandle(token_handler);
-    return 0;
-  }
-
-  /* flush the file cache */
-  FlushFileBuffers(token_handler);
-  /* set access offset to the begin of the file */
-  SetFilePointer(token_handler, 0, NULL, FILE_BEGIN);
-
-  /* write back the token */
-  DWORD write_num = 0;
-  WriteFile(token_handler, token, sizeof(sgx_launch_token_t), &write_num, NULL);
-  if (write_num != sizeof(sgx_launch_token_t))
-    printf("Warning: Failed to save launch token to \"%s\".\n", token_path);
-  CloseHandle(token_handler);
-#else /* __GNUC__ */
   if (updated == FALSE || fp == NULL) {
     /* if the token is not updated, or file handler is invalid, do not perform saving */
     if (fp != NULL) fclose(fp);
     return 0;
   }
-
   /* reopen the file with write capablity */
   fp = freopen(token_path, "wb", fp);
   if (fp == NULL) return 0;
@@ -338,7 +286,6 @@ int initialize_enclave(void)
   if (write_num != sizeof(sgx_launch_token_t))
     printf("Warning: Failed to save launch token to \"%s\".\n", token_path);
   fclose(fp);
-#endif
   return 0;
 }
 
@@ -596,46 +543,6 @@ JNIEXPORT void JNICALL Java_edu_berkeley_cs_rise_opaque_execution_SGXEnclave_Rem
   printf("RemoteAttestation3 called\n");
 #endif
 
-  sgx_status_t status = SGX_SUCCESS;
-  //uint32_t input_len = (uint32_t) env->GetArrayLength(att_result_input);
-  jboolean if_copy = false;
-  jbyte *ptr = env->GetByteArrayElements(att_result_input, &if_copy);
-
-  ra_samp_response_header_t *att_result_full = (ra_samp_response_header_t *)(ptr);
-  sample_ra_att_result_msg_t *att_result = (sample_ra_att_result_msg_t *) att_result_full->body;
-
-#ifdef DEBUG
-  printf("[RemoteAttestation3] att_result's size is %u\n", att_result_full->size);
-#endif
-
-  // Check the MAC using MK on the attestation result message.
-  // The format of the attestation result message is ISV specific.
-  // This is a simple form for demonstration. In a real product,
-  // the ISV may want to communicate more information.
-  int ret = 0;
-  ret = ecall_verify_att_result_mac(eid,
-                                    &status,
-                                    context,
-                                    (uint8_t*)&att_result->platform_info_blob,
-                                    sizeof(ias_platform_info_blob_t),
-                                    (uint8_t*)&att_result->mac,
-                                    sizeof(sgx_mac_t));
-
-  if((SGX_SUCCESS != ret) || (SGX_SUCCESS != status)) {
-    fprintf(stdout, "\nError: INTEGRITY FAILED - attestation result message MK based cmac failed in [%s], status is %u", __FUNCTION__, (uint32_t) status);
-    return ;
-  }
-
-  bool attestation_passed = true;
-  // Check the attestation result for pass or fail.
-  // Whether attestation passes or fails is a decision made by the ISV Server.
-  // When the ISV server decides to trust the enclave, then it will return success.
-  // When the ISV server decided to not trust the enclave, then it will return failure.
-  if (0 != att_result_full->status[0] || 0 != att_result_full->status[1]) {
-    fprintf(stdout, "\nError, attestation result message MK based cmac "
-            "failed in [%s].", __FUNCTION__);
-    attestation_passed = false;
-  }
 
   // The attestation result message should contain a field for the Platform
   // Info Blob (PIB).  The PIB is returned by attestation server in the attestation report.
@@ -656,22 +563,7 @@ JNIEXPORT void JNICALL Java_edu_berkeley_cs_rise_opaque_execution_SGXEnclave_Rem
 #ifdef DEBUG
   printf("[RemoteAttestation3] %u\n", attestation_passed);
 #endif
-  if (attestation_passed) {
-    ret = ecall_put_secret_data(eid,
-                                &status,
-                                context,
-                                att_result->secret.payload,
-                                att_result->secret.payload_size,
-                                att_result->secret.payload_tag);
 
-    if((SGX_SUCCESS != ret)  || (SGX_SUCCESS != status)) {
-      fprintf(stdout, "\nError, attestation result message secret "
-              "using SK based AESGCM failed in [%s]. ret = "
-              "0x%0x. status = 0x%0x", __FUNCTION__, ret,
-              status);
-      return ;
-    }
-  }
 
   fprintf(stdout, "\nSecret successfully received from server.");
   fprintf(stdout, "\nRemote attestation success!\n");
